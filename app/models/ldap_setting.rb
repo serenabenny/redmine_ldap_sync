@@ -28,9 +28,9 @@ class LdapSetting
   # LDAP_DESCRIPTORS
   LDAP_ATTRIBUTES = %w( groupname member user_memberid user_groups groupid parent_group primary_group group_parentid member_group group_memberid account_flags )
   CLASS_NAMES = %w( class_user class_group )
-  FLAGS = %w( create_groups create_users active )
+  FLAGS = %w( create_groups create_users active create_nested_groups )
   COMBOS = %w( group_membership nested_groups sync_on_login dyngroups users_search_scope )
-  OTHERS = %w( account_locked_test user_fields_to_sync group_fields_to_sync user_ldap_attrs group_ldap_attrs fixed_group admin_group required_group group_search_filter groupname_pattern groups_base_dn dyngroups_cache_ttl )
+  OTHERS = %w( account_locked_test user_fields_to_sync group_fields_to_sync user_ldap_attrs group_ldap_attrs fixed_group admin_group required_group group_search_filter groupname_pattern groups_base_dn dyngroups_cache_ttl nested_groups_base_dn )
 
   validates_presence_of :auth_source_ldap_id
   validates_presence_of :class_user, :class_group, :groupname

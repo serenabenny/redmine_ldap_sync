@@ -165,7 +165,8 @@ module LdapSync::EntityManager
             user_dn = entry[:dn].first
 
             names_filter = groups.map{|g| Net::LDAP::Filter.eq( setting.groupid, g )}.reduce(:|)
-            find_all_groups(ldap, names_filter, n(:groupname)) do |group|
+            options = setting.has_nested_groups_base_dn? ? {:base => setting.nested_groups_base_dn} : {}
+            find_all_groups(ldap, names_filter, n(:groupname), options) do |group|
               changes[:added] << group.first
             end if names_filter
           end
@@ -214,10 +215,11 @@ module LdapSync::EntityManager
 
     def get_group_closure(ldap, group, closure=Set.new)
       groupname = group.is_a?(String) ? group : group[n(:groupname)].first
+      options = setting.has_nested_groups_base_dn? ? {:base => setting.nested_groups_base_dn} : {}
       parent_groups = parents_cache.fetch(groupname) do
         case setting.nested_groups
         when 'on_members'
-          group = find_group(ldap, groupname, ns(:groupname, :group_memberid, :parent_group)) if group.is_a? String
+          group = find_group(ldap, groupname, ns(:groupname, :group_memberid, :parent_group), options) if group.is_a? String
 
           if group[n(:parent_group)].present?
             groups_filter = group[n(:parent_group)].map{|g| Net::LDAP::Filter.eq( setting.group_parentid, g )}.reduce(:|)
@@ -226,7 +228,7 @@ module LdapSync::EntityManager
             Array.new
           end
         else # 'on_parents'
-          group = find_group(ldap, groupname, ns(:groupname, :group_memberid)) if group.is_a? String
+          group = find_group(ldap, groupname, ns(:groupname, :group_memberid), options) if group.is_a? String
 
           member_filter = Net::LDAP::Filter.eq( setting.member_group, group[n(:group_memberid)].first )
           cacheable_ber find_all_groups(ldap, member_filter, ns(:groupname, :group_memberid)).map
@@ -239,15 +241,15 @@ module LdapSync::EntityManager
       end
     end
 
-    def find_group(ldap, group_name, attrs, &block)
+    def find_group(ldap, group_name, attrs, options = {}, &block)
       extra_filter = Net::LDAP::Filter.eq( setting.groupname, group_name )
-      result = find_all_groups(ldap, extra_filter, attrs, &block)
+      result = find_all_groups(ldap, extra_filter, attrs, options, &block)
       result.first if !block_given? && result.present?
     end
 
     def find_all_groups(ldap, extra_filter, attrs, options = {}, &block)
       object_class = options[:class] || setting.class_group
-      groups_base_dn = setting.has_groups_base_dn? ? setting.groups_base_dn : nil
+      groups_base_dn = options[:base] || (setting.has_groups_base_dn? ? setting.groups_base_dn : nil)
       group_filter = Net::LDAP::Filter.eq( :objectclass, object_class )
       group_filter &= Net::LDAP::Filter.construct( setting.group_search_filter ) if setting.group_search_filter.present?
       group_filter &= extra_filter if extra_filter

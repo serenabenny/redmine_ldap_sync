@@ -164,7 +164,13 @@ module LdapSync::Infectors::AuthSourceLdap
         end
 
         changes = groups_changes(user)
-        added = changes[:added].map {|g| find_or_create_group(g).first }.compact
+        added = changes[:added].map {|g|
+          if setting.create_nested_groups?
+            find_or_create_group(g).first
+          else
+            ::Group.where("LOWER(lastname) = ?", g.mb_chars.downcase).first
+          end
+        }.compact
         user.groups << added unless added.empty?
 
         deleted_groups = changes[:deleted].map {|g| g.mb_chars.downcase }

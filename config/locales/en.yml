@@ -35,12 +35,14 @@ en:
 
   field_nested_groups: "Nested groups"
   field_create_groups: "Create groups"
+  field_create_nested_groups: "Create nested groups"
   field_create_users: "Create users"
   field_sync_on_login: "Synchronize on login"
   field_dyngroups: "Dynamic groups"
   field_dyngroups_cache_ttl: "Cache TTL"
 
   field_groups_base_dn: "Groups base DN"
+  field_nested_groups_base_dn: "Nested groups base DN"
   field_group_membership: "Group membership"
   field_class_user: "Users objectclass"
   field_users_search_scope: "Users search scope"

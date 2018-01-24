@@ -13,6 +13,7 @@
   <p><%= f.text_field :account_locked_test, :size => 50 %></p>
   <p><%= f.select :group_membership, options_for_group_membeship %></p>
   <p><%= f.select :nested_groups, options_for_nested_groups %></p>
+  <p><%= f.text_field :nested_groups_base_dn, :size => 50 %></p>
 
   <fieldset class="box" id="ldap_attributes">
     <legend><%=l(:label_attribute_plural)%></legend>
